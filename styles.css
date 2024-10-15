@@ -1,0 +1,193 @@
+/* Global Styles */
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('https://image.slidesdocs.com/responsive-images/background/education-sax-music-piano-white-abstract-powerpoint-background_3143d17bb7__960_540.jpg');
+    background-attachment: fixed; /* Makes the background fixed */
+    background-size: cover; /* Ensures the background covers the whole page */
+    color: #333;
+}
+
+header {
+    background-color: rgba(29, 185, 84, 0.9);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.controls {
+    display: flex; /* Use flexbox for alignment */
+    justify-content: center; /* Center the controls */
+    padding-top: 20px;
+}
+
+#home-button, #search-button, #back-button, #mode-button {
+    width: 100px;
+    height: 50px;
+    font-size: 19px;
+    border-radius: 10px;
+    color: black;
+    cursor: pointer;
+    margin: 0 10px; /* Space between buttons */
+    transition: background-color 0.3s; /* Smooth transition for button background */
+}
+
+
+
+#search-input {
+    width: 200px;
+    height: 30px;
+    padding: 10px;
+    border-radius: 15px;
+    font-size: 20px;
+}
+
+/* #search-button, #back-button {
+    width: 100px;
+    height: 50px;
+    font-size: 19px;
+    border-radius: 10px;
+    background-color: black;
+    color: white;
+    cursor: pointer;
+    margin-left: 10px; /* Space between buttons */
+/* }  */
+
+.results-container {
+    display: flex; /* Use flexbox to center content */
+    flex-direction: column; /* Stack results vertically */
+    align-items: center; /* Center align the track container */
+    margin-top: 20px; /* Space above results */
+}
+
+#track-container {
+    display: flex;
+    flex-direction: column; /* Stack song items vertically */
+    width: 100%; /* Set to full width for the track container */
+    max-width: 1000px; /* Optional: Limit max width to prevent extreme stretching on large screens */
+    margin: 0 auto; /* Center the container */
+    cursor: pointer;
+}
+
+#track-container div {
+    background-color: rgba(255, 255, 255, 0.8); /* White background with transparency */
+    padding: 15px; /* Inner spacing */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 4px; /* Rounded corners */
+    margin-bottom: 10px; /* Space between results */
+    margin-top: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    display: flex; /* Use flexbox for alignment inside */
+    align-items: center; /* Center align items vertically */
+    justify-content: space-between; /* Space out items horizontally */
+}
+
+h4 {
+    margin: 0; /* Remove default margin */
+    flex: 1; /* Allow the title to grow */
+}
+
+img {
+    margin-left: 10px; /* Space to the left of images */
+    width: 50px; /* Set a fixed width for images */
+    height: 50px; /* Set a fixed height for images */
+}
+
+audio {
+    flex: 1; /* Allow audio player to grow */
+    margin-left: 10px; /* Space to the left of the audio player */
+}
+
+#no-results-message {
+    color: #d9534f; /* Bootstrap danger red */
+    font-weight: bold; /* Bold text */
+    text-align: center; /* Center align no results message */
+}
+
+body.dark-mode {
+    background-color: #333; /* Dark background color */
+    color: #fff; /* Light text color */
+}
+
+body.dark-mode header {
+    background-color: rgba(0, 0, 0, 0.8); /* Dark header */
+}
+
+body.dark-mode #track-container div {
+    background-color: black; /* Darker card background */
+    border: 1px solid #444; /* Darker border */
+}
+
+body.dark-mode #search-button, 
+body.dark-mode #home-button, 
+body.dark-mode #back-button, 
+body.dark-mode #mode-button {
+    background-color: #555; /* Darker button background */
+    color: whitesmoke;
+}
+
+body.dark-mode #search-input {
+    background-color: #555; /* Darker input background */
+    color: #fff; /* Light text color */
+    border: 1px solid #777; /* Lighter border for visibility */
+}
+
+body.dark-mode #no-results-message {
+    color: #d9534f; /* Red color for no results message */
+}
+/* Modal styles */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin:15px;
+}
+
+.modal-content {
+    background-color: lightblue;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: black;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.modal-controls {
+    margin-top: 20px;
+}
+#prev-button, #next-button {
+    padding: 10px 15px;
+    background-color: darkblue; /* Green for Next/Previous */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#prev-button:hover, #next-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
