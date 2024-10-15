@@ -39,8 +39,6 @@ h1 {
     transition: background-color 0.3s; /* Smooth transition for button background */
 }
 
-
-
 #search-input {
     width: 200px;
     height: 30px;
@@ -48,17 +46,6 @@ h1 {
     border-radius: 15px;
     font-size: 20px;
 }
-
-/* #search-button, #back-button {
-    width: 100px;
-    height: 50px;
-    font-size: 19px;
-    border-radius: 10px;
-    background-color: black;
-    color: white;
-    cursor: pointer;
-    margin-left: 10px; /* Space between buttons */
-/* }  */
 
 .results-container {
     display: flex; /* Use flexbox to center content */
@@ -142,6 +129,7 @@ body.dark-mode #search-input {
 body.dark-mode #no-results-message {
     color: #d9534f; /* Red color for no results message */
 }
+
 /* Modal styles */
 .modal {
     position: fixed;
@@ -155,7 +143,7 @@ body.dark-mode #no-results-message {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin:15px;
+    margin: 15px;
 }
 
 .modal-content {
@@ -179,9 +167,10 @@ body.dark-mode #no-results-message {
 .modal-controls {
     margin-top: 20px;
 }
+
 #prev-button, #next-button {
     padding: 10px 15px;
-    background-color: darkblue; /* Green for Next/Previous */
+    background-color: darkblue;
     color: white;
     border: none;
     border-radius: 5px;
@@ -189,5 +178,51 @@ body.dark-mode #no-results-message {
 }
 
 #prev-button:hover, #next-button:hover {
-    background-color: #218838; /* Darker green on hover */
+    background-color: #218838;
 }
+
+/* Media Queries for Mobile */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8rem; /* Smaller header text */
+    }
+
+    #home-button, #search-button, #back-button, #mode-button {
+        width: 80px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    #search-input {
+        width: 150px;
+        height: 25px;
+        font-size: 18px;
+    }
+
+    #track-container div {
+        padding: 10px; /* Reduce padding for mobile */
+        flex-direction: column; /* Stack elements vertically */
+        text-align: center; /* Center align for better mobile view */
+    }
+
+    img {
+        width: 40px; /* Smaller images */
+        height: 40px;
+    }
+
+    audio {
+        width: 100%; /* Make the audio player full width on mobile */
+        margin-top: 10px; /* Add spacing */
+    }
+
+    .controls {
+        flex-direction: column; /* Stack controls vertically */
+        padding-top: 10px;
+    }
+
+    #prev-button, #next-button {
+        width: 100px; /* Adjust button sizes for mobile */
+        font-size: 14px;
+    }
+}
+
