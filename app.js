@@ -1,59 +1,69 @@
-const searchButton = document.getElementById('search-button');
-const searchInput = document.getElementById('search-input');
-const albumContainer = document.getElementById('album-container');
-const trackContainer = document.getElementById('track-container');
-const noResultsMessage = document.getElementById('no-results-message');
-const backButton = document.getElementById('back-button');
-const homeButton = document.getElementById('home-button');
-const modeButton = document.getElementById('mode-button');
+const searchButton = document.getElementById("search-button");
+const searchInput = document.getElementById("search-input");
+const trackContainer = document.getElementById("track-container");
+const noResultsMessage = document.getElementById("no-results-message");
+const backButton = document.getElementById("back-button");
+const homeButton = document.getElementById("home-button");
+const modeButton = document.getElementById("mode-button");
 
 let previousResults = [];
+let currentIndex = -1;
 let isDarkMode = false;
-let currentIndex = -1; // Current index of the playing song
 
-// Fetch data from the API
+
+// SEARCH API
 async function fetchData(query) {
     try {
-        const response = await fetch('https://saavn.sumit.co/api/search?query=Imagine+Dragons');
+
+        const response = await fetch(
+            `https://saavn.sumit.co/api/search?query=${query}`
+        );
+
         const data = await response.json();
 
-        console.log("API Response:", data);
+        console.log("API DATA:", data);
 
-        if (data.success && data.data && data.data.results && data.data.results.length > 0) {
-            previousResults = data.data.results; // Store the current results
-            displayResults(data.data.results);
-            backButton.style.display = 'inline';
+        const songs = data.data.songs.results;
+
+        if (songs && songs.length > 0) {
+
+            previousResults = songs;
+
+            displayResults(songs);
+
+            backButton.style.display = "inline";
+
         } else {
-            console.error("No results found in the API response:", data);
             displayNoResults();
         }
+
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Fetch Error:", error);
         displayNoResults();
     }
 }
 
-// Display the search results
+
+
+// DISPLAY SONG LIST
 function displayResults(results) {
-    albumContainer.innerHTML = '';
-    trackContainer.innerHTML = '';
-    noResultsMessage.innerHTML = '';
+
+    trackContainer.innerHTML = "";
+    noResultsMessage.innerHTML = "";
 
     results.forEach((song, index) => {
-        const songElement = document.createElement('div');
-        const audioUrl = song.downloadUrl ? song.downloadUrl.find(url => url.quality === '160kbps')?.url || song.downloadUrl[0]?.url : null;
+
+        const songElement = document.createElement("div");
+
+        songElement.classList.add("song-card");
 
         songElement.innerHTML = `
-            <h4>${song.name} - ${song.language || 'Unknown'} (Song)</h4>
-            <img src="${song.image ? song.image[0]?.url : ''}" alt="${song.name}" style="width: 100px; height: 100px;">
-            <audio controls>
-                <source src="${audioUrl || ''}" type="audio/mpeg">
-                Your browser does not support the audio element.
-            </audio>
+            <h4>${song.title}</h4>
+            <img src="${song.image[2].url}" width="120">
+            <p>${song.primaryArtists}</p>
         `;
 
-        // Add click event to open the modal with the song
-        songElement.addEventListener('click', () => {
+        songElement.addEventListener("click", () => {
             openAudioPlayer(song, index, results);
         });
 
@@ -61,78 +71,137 @@ function displayResults(results) {
     });
 }
 
-// Function to open the audio player modal
-function openAudioPlayer(song, index, results) {
+
+
+// GET SONG AUDIO
+async function openAudioPlayer(song, index, results) {
+
     currentIndex = index;
-    document.getElementById('modal-song-title').textContent = `${song.name} - ${song.language || 'Unknown'}`;
 
-    const modalAudio = document.getElementById('modal-audio');
-    modalAudio.src = song.downloadUrl ? song.downloadUrl.find(url => url.quality === '160kbps')?.url || song.downloadUrl[0]?.url : '';
+    try {
 
-    const modal = document.getElementById('audio-player-modal');
-    modal.style.display = 'flex'; // Show modal
+        const response = await fetch(
+            `https://saavn.sumit.co/api/songs?id=${song.id}`
+        );
 
-    modalAudio.play();
+        const data = await response.json();
 
-    document.getElementById('prev-button').onclick = () => playPrevious(results);
-    document.getElementById('next-button').onclick = () => playNext(results);
+        const audioUrl =
+            data.data[0].downloadUrl.find(q => q.quality === "160kbps").url;
 
-    document.querySelector('.close').onclick = () => {
-        modal.style.display = 'none'; // Hide modal
-        modalAudio.pause(); // Pause audio when closing
-    };
+        const modal = document.getElementById("audio-player-modal");
+        const modalAudio = document.getElementById("modal-audio");
+
+        document.getElementById("modal-song-title").textContent =
+            song.title + " - " + song.primaryArtists;
+
+        modalAudio.src = audioUrl;
+
+        modal.style.display = "flex";
+
+        modalAudio.play();
+
+
+        document.getElementById("prev-button").onclick = () =>
+            playPrevious(results);
+
+        document.getElementById("next-button").onclick = () =>
+            playNext(results);
+
+        document.querySelector(".close").onclick = () => {
+            modal.style.display = "none";
+            modalAudio.pause();
+        };
+
+    } catch (error) {
+
+        console.error("Audio fetch error:", error);
+    }
 }
 
-// Function to play the previous song
+
+
+// PREVIOUS SONG
 function playPrevious(results) {
+
     if (currentIndex > 0) {
-        openAudioPlayer(results[--currentIndex], currentIndex, results);
+
+        currentIndex--;
+
+        openAudioPlayer(results[currentIndex], currentIndex, results);
     }
 }
 
-// Function to play the next song
+
+
+// NEXT SONG
 function playNext(results) {
+
     if (currentIndex < results.length - 1) {
-        openAudioPlayer(results[++currentIndex], currentIndex, results);
+
+        currentIndex++;
+
+        openAudioPlayer(results[currentIndex], currentIndex, results);
     }
 }
 
-// Display 'No Results Found' message
+
+
+// NO RESULTS MESSAGE
 function displayNoResults() {
-    albumContainer.innerHTML = '';
-    trackContainer.innerHTML = '';
-    noResultsMessage.textContent = 'No results found for your search. Please try a different song.';
+
+    trackContainer.innerHTML = "";
+
+    noResultsMessage.textContent =
+        "No results found. Try another song.";
 }
 
-// Add event listener for the search button
-searchButton.addEventListener('click', () => {
+
+
+// SEARCH BUTTON
+searchButton.addEventListener("click", () => {
+
     const query = searchInput.value.trim();
+
     if (query) {
         fetchData(query);
     }
 });
 
-// Add event listener for the back button
-backButton.addEventListener('click', () => {
+
+
+// BACK BUTTON
+backButton.addEventListener("click", () => {
+
     if (previousResults.length > 0) {
+
         displayResults(previousResults);
-        backButton.style.display = 'inline';
-    } else {
-        backButton.style.display = 'none';
     }
 });
 
-// Add event listener for the home button
-homeButton.addEventListener('click', () => {
-    searchInput.value = '';
-    trackContainer.innerHTML = '';
-    noResultsMessage.innerHTML = '';
-    backButton.style.display = 'none';
+
+
+// HOME BUTTON
+homeButton.addEventListener("click", () => {
+
+    searchInput.value = "";
+
+    trackContainer.innerHTML = "";
+
+    noResultsMessage.innerHTML = "";
+
+    backButton.style.display = "none";
 });
 
-// Add event listener for the dark/light mode toggle
-modeButton.addEventListener('click', () => {
+
+
+// DARK MODE
+modeButton.addEventListener("click", () => {
+
     isDarkMode = !isDarkMode;
-    document.body.classList.toggle('dark-mode', isDarkMode);
-    modeButton.textContent = isDarkMode ? 'Switch to Light' : 'Switch to Dark';
+
+    document.body.classList.toggle("dark-mode");
+
+    modeButton.textContent =
+        isDarkMode ? "Switch to Light" : "Switch to Dark";
 });
