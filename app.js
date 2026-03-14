@@ -14,7 +14,7 @@ let currentIndex = -1; // Current index of the playing song
 // Fetch data from the API
 async function fetchData(query) {
     try {
-        const response = await fetch('https://saavn.sumit.co/api/search?query=Imagine+Dragons'));
+        const response = await fetch('https://saavn.sumit.co/api/search?query=Imagine+Dragons');
         const data = await response.json();
 
         console.log("API Response:", data);
