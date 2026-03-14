@@ -80,14 +80,16 @@ async function openAudioPlayer(song, index, results) {
 
     try {
 
-        const response = await fetch(
-            `https://saavn.sumit.co/api/songs?id=${song.id}`
-        );
-
+        const response = await fetch(`https://saavn.sumit.co/api/songs?id=${song.id}`);
         const data = await response.json();
 
-        const audioUrl =
-            data.data[0].downloadUrl.find(q => q.quality === "160kbps").url;
+        console.log("Song Data:", data);
+
+        const songData = data.data[0];
+
+        const audioUrl = songData.downloadUrl.find(
+            q => q.quality === "160kbps"
+        )?.url || songData.downloadUrl[0].url;
 
         const modal = document.getElementById("audio-player-modal");
         const modalAudio = document.getElementById("modal-audio");
@@ -99,14 +101,11 @@ async function openAudioPlayer(song, index, results) {
 
         modal.style.display = "flex";
 
+        modalAudio.load();
         modalAudio.play();
 
-
-        document.getElementById("prev-button").onclick = () =>
-            playPrevious(results);
-
-        document.getElementById("next-button").onclick = () =>
-            playNext(results);
+        document.getElementById("prev-button").onclick = () => playPrevious(results);
+        document.getElementById("next-button").onclick = () => playNext(results);
 
         document.querySelector(".close").onclick = () => {
             modal.style.display = "none";
@@ -118,7 +117,6 @@ async function openAudioPlayer(song, index, results) {
         console.error("Audio fetch error:", error);
     }
 }
-
 
 
 // PREVIOUS SONG
