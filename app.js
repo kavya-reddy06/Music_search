@@ -1,172 +1,145 @@
-const searchButton = document.getElementById('search-button');
-const searchInput = document.getElementById('search-input');
-const trackContainer = document.getElementById('track-container');
-const noResultsMessage = document.getElementById('no-results-message');
-const backButton = document.getElementById('back-button');
+const searchButton=document.getElementById("search-button")
+const searchInput=document.getElementById("search-input")
+const trackContainer=document.getElementById("track-container")
+const modal=document.getElementById("audio-player-modal")
+const modalAudio=document.getElementById("modal-audio")
+const modalTitle=document.getElementById("modal-song-title")
+const modalImage=document.getElementById("modal-image")
 
-let previousResults = [];
-let currentIndex = -1;
+let songs=[]
+let currentIndex=0
 
 
-// SEARCH SONGS
-async function fetchData(query) {
+async function fetchSongs(query){
 
-    try {
+const response=await fetch(`https://saavn.sumit.co/api/search?query=${query}`)
 
-        const response = await fetch(
-            `https://saavn.sumit.co/api/search?query=${query}`
-        );
+const data=await response.json()
 
-        const data = await response.json();
+songs=data.data.songs.results
 
-        console.log("API Response:", data);
+displaySongs(songs)
 
-        const songs = data.data.songs.results;
-
-        if (songs && songs.length > 0) {
-
-            previousResults = songs;
-
-            displayResults(songs);
-
-            backButton.style.display = "inline";
-
-        } else {
-
-            displayNoResults();
-        }
-
-    } catch (error) {
-
-        console.error("Fetch error:", error);
-
-        displayNoResults();
-    }
 }
 
 
-// DISPLAY RESULTS
-function displayResults(results) {
+function displaySongs(list){
 
-    trackContainer.innerHTML = "";
-    noResultsMessage.innerHTML = "";
+trackContainer.innerHTML=""
 
-    results.forEach((song, index) => {
+list.forEach((song,index)=>{
 
-        const songElement = document.createElement("div");
+const card=document.createElement("div")
 
-        songElement.innerHTML = `
-            <h4>${song.title}</h4>
-            <img src="${song.image[2].url}" width="120">
-            <p>${song.primaryArtists}</p>
-        `;
+card.className="song-card"
 
-        songElement.addEventListener("click", () => {
-            playSong(song, index);
-        });
+card.innerHTML=`
 
-        trackContainer.appendChild(songElement);
-    });
+<img src="${song.image[2].url}">
+
+<div>
+
+<h4>${song.title}</h4>
+
+<p>${song.primaryArtists}</p>
+
+</div>
+
+`
+
+card.onclick=()=>playSong(index)
+
+trackContainer.appendChild(card)
+
+})
+
 }
 
 
-// PLAY SONG
-async function playSong(song, index) {
+async function playSong(index){
 
-    currentIndex = index;
+currentIndex=index
 
-    try {
+const song=songs[index]
 
-        const response = await fetch(
-            `https://saavn.sumit.co/api/songs?id=${song.id}`
-        );
+const response=await fetch(`https://saavn.sumit.co/api/songs?id=${song.id}`)
 
-        const data = await response.json();
+const data=await response.json()
 
-        console.log("Song data:", data);
+const audio=data.data[0].downloadUrl.find(x=>x.quality==="160kbps").url
 
-        const audioUrl =
-            data.data[0].downloadUrl.find(
-                q => q.quality === "160kbps"
-            ).url;
+modalTitle.textContent=`${song.title} - ${song.primaryArtists}`
 
-        const modalAudio = document.getElementById("modal-audio");
+modalImage.src=song.image[2].url
 
-        document.getElementById("modal-song-title").textContent =
-            `${song.title} - ${song.primaryArtists}`;
+modalAudio.src=audio
 
-        modalAudio.src = audioUrl;
+modal.style.display="flex"
 
-        const modal = document.getElementById("audio-player-modal");
+modalAudio.play()
 
-        modal.style.display = "flex";
-
-        modalAudio.load();
-
-        modalAudio.play();
-
-    } catch (error) {
-
-        console.error("Audio fetch error:", error);
-    }
 }
 
 
-// PREVIOUS SONG
-function playPrevious() {
+document.getElementById("prev-button").onclick=()=>{
 
-    if (currentIndex > 0) {
+if(currentIndex>0){
 
-        currentIndex--;
+currentIndex--
 
-        playSong(previousResults[currentIndex], currentIndex);
-    }
+playSong(currentIndex)
+
+}
+
 }
 
 
-// NEXT SONG
-function playNext() {
+document.getElementById("next-button").onclick=()=>{
 
-    if (currentIndex < previousResults.length - 1) {
+if(currentIndex<songs.length-1){
 
-        currentIndex++;
+currentIndex++
 
-        playSong(previousResults[currentIndex], currentIndex);
-    }
+playSong(currentIndex)
+
+}
+
 }
 
 
-// NO RESULTS
-function displayNoResults() {
+document.querySelector(".close").onclick=()=>{
 
-    trackContainer.innerHTML = "";
+modal.style.display="none"
 
-    noResultsMessage.textContent =
-        "No results found. Try another song.";
+modalAudio.pause()
+
 }
 
 
-// SEARCH BUTTON
-searchButton.addEventListener("click", () => {
+searchButton.onclick=()=>{
 
-    const query = searchInput.value.trim();
+const query=searchInput.value.trim()
 
-    if (query) fetchData(query);
-});
+if(query) fetchSongs(query)
 
-
-// ENTER KEY SEARCH
-searchInput.addEventListener("keypress", (e) => {
-
-    if (e.key === "Enter") {
-
-        const query = searchInput.value.trim();
-
-        if (query) fetchData(query);
-    }
-});
+}
 
 
-// AUTO PLAY NEXT
-document.getElementById("modal-audio")
-.addEventListener("ended", playNext);
+searchInput.addEventListener("keypress",(e)=>{
+
+if(e.key==="Enter"){
+
+const query=searchInput.value.trim()
+
+if(query) fetchSongs(query)
+
+}
+
+})
+
+
+document.getElementById("mode-button").onclick=()=>{
+
+document.body.classList.toggle("dark-mode")
+
+}
