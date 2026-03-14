@@ -1,50 +1,47 @@
-const searchButton=document.getElementById("search-button")
-const searchInput=document.getElementById("search-input")
-const trackContainer=document.getElementById("track-container")
-const modal=document.getElementById("audio-player-modal")
-const modalAudio=document.getElementById("modal-audio")
-const modalTitle=document.getElementById("modal-song-title")
-const modalImage=document.getElementById("modal-image")
+const trackContainer = document.getElementById("track-container")
+const searchButton = document.getElementById("search-button")
+const searchInput = document.getElementById("search-input")
 
-let songs=[]
-let currentIndex=0
+const modal = document.getElementById("audio-player-modal")
+const modalAudio = document.getElementById("modal-audio")
+const modalTitle = document.getElementById("modal-song-title")
+const modalImage = document.getElementById("modal-image")
+
+let songs = []
+let currentIndex = 0
 
 
-async function fetchSongs(query){
+async function searchSongs(query){
 
-const response=await fetch(`https://saavn.sumit.co/api/search?query=${query}`)
+const response = await fetch(
+`https://saavn.sumit.co/api/search?query=${query}`
+)
 
-const data=await response.json()
+const data = await response.json()
 
-songs=data.data.songs.results
+songs = data.data.songs.results
 
 displaySongs(songs)
 
 }
 
 
-function displaySongs(list){
+function displaySongs(songList){
 
 trackContainer.innerHTML=""
 
-list.forEach((song,index)=>{
+songList.forEach((song,index)=>{
 
 const card=document.createElement("div")
 
 card.className="song-card"
 
 card.innerHTML=`
-
 <img src="${song.image[2].url}">
-
 <div>
-
 <h4>${song.title}</h4>
-
 <p>${song.primaryArtists}</p>
-
 </div>
-
 `
 
 card.onclick=()=>playSong(index)
@@ -62,19 +59,24 @@ currentIndex=index
 
 const song=songs[index]
 
-const response=await fetch(`https://saavn.sumit.co/api/songs?id=${song.id}`)
+const response=await fetch(
+`https://saavn.sumit.co/api/songs?id=${song.id}`
+)
 
 const data=await response.json()
 
-const audio=data.data[0].downloadUrl.find(x=>x.quality==="160kbps").url
+const audioUrl=
+data.data[0].downloadUrl.find(x=>x.quality==="160kbps").url
 
 modalTitle.textContent=`${song.title} - ${song.primaryArtists}`
 
 modalImage.src=song.image[2].url
 
-modalAudio.src=audio
+modalAudio.src=audioUrl
 
 modal.style.display="flex"
+
+modalAudio.load()
 
 modalAudio.play()
 
@@ -120,7 +122,7 @@ searchButton.onclick=()=>{
 
 const query=searchInput.value.trim()
 
-if(query) fetchSongs(query)
+if(query) searchSongs(query)
 
 }
 
@@ -131,15 +133,8 @@ if(e.key==="Enter"){
 
 const query=searchInput.value.trim()
 
-if(query) fetchSongs(query)
+if(query) searchSongs(query)
 
 }
 
 })
-
-
-document.getElementById("mode-button").onclick=()=>{
-
-document.body.classList.toggle("dark-mode")
-
-}
