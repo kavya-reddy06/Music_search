@@ -1,140 +1,161 @@
-const trackContainer = document.getElementById("track-container")
-const searchButton = document.getElementById("search-button")
-const searchInput = document.getElementById("search-input")
+const trackContainer = document.getElementById("track-container");
+const searchButton = document.getElementById("search-button");
+const searchInput = document.getElementById("search-input");
 
-const modal = document.getElementById("audio-player-modal")
-const modalAudio = document.getElementById("modal-audio")
-const modalTitle = document.getElementById("modal-song-title")
-const modalImage = document.getElementById("modal-image")
+const modal = document.getElementById("audio-player-modal");
+const modalAudio = document.getElementById("modal-audio");
+const modalTitle = document.getElementById("modal-song-title");
+const modalImage = document.getElementById("modal-image");
 
-let songs = []
-let currentIndex = 0
-
-
-async function searchSongs(query){
-
-const response = await fetch(
-`https://saavn.sumit.co/api/search?query=${query}`
-)
-
-const data = await response.json()
-
-songs = data.data.songs.results
-
-displaySongs(songs)
-
-}
+let songs = [];
+let currentIndex = 0;
 
 
-function displaySongs(songList){
+// SEARCH SONGS
+async function searchSongs(query) {
 
-trackContainer.innerHTML=""
+    try {
 
-songList.forEach((song,index)=>{
+        const response = await fetch(
+            `https://saavn.sumit.co/api/search?query=${encodeURIComponent(query)}`
+        );
 
-const card=document.createElement("div")
+        const data = await response.json();
 
-card.className="song-card"
+        console.log("Search API:", data);
 
-card.innerHTML=`
-<img src="${song.image[2].url}">
-<div>
-<h4>${song.title}</h4>
-<p>${song.primaryArtists}</p>
-</div>
-`
+        songs = data.data.songs.results || [];
 
-card.onclick=()=>playSong(index)
+        displaySongs(songs);
 
-trackContainer.appendChild(card)
-
-})
+    } catch (error) {
+        console.error("Search error:", error);
+    }
 
 }
 
 
-async function playSong(index){
+// DISPLAY SONG CARDS
+function displaySongs(songList) {
 
-currentIndex=index
+    trackContainer.innerHTML = "";
 
-const song=songs[index]
+    songList.forEach((song, index) => {
 
-const response=await fetch(
-`https://saavn.sumit.co/api/songs?id=${song.id}`
-)
+        const card = document.createElement("div");
+        card.className = "song-card";
 
-const data=await response.json()
+        card.innerHTML = `
+            <img src="${song.image?.[2]?.url || ""}">
+            <div>
+                <h4>${song.title}</h4>
+                <p>${song.primaryArtists}</p>
+            </div>
+        `;
 
-const audioUrl=
-data.data[0].downloadUrl.find(x=>x.quality==="160kbps").url
+        card.onclick = () => playSong(index);
 
-modalTitle.textContent=`${song.title} - ${song.primaryArtists}`
-
-modalImage.src=song.image[2].url
-
-modalAudio.src=audioUrl
-
-modal.style.display="flex"
-
-modalAudio.load()
-
-modalAudio.play()
+        trackContainer.appendChild(card);
+    });
 
 }
 
 
-document.getElementById("prev-button").onclick=()=>{
+// PLAY SONG
+async function playSong(index) {
 
-if(currentIndex>0){
+    try {
 
-currentIndex--
+        currentIndex = index;
 
-playSong(currentIndex)
+        const song = songs[index];
 
-}
+        const response = await fetch(
+            `https://saavn.sumit.co/api/songs?id=${song.id}`
+        );
 
-}
+        const data = await response.json();
 
+        console.log("Song API:", data);
 
-document.getElementById("next-button").onclick=()=>{
+        const urls = data.data?.[0]?.downloadUrl || [];
 
-if(currentIndex<songs.length-1){
+        // choose best available quality
+        const audioUrl =
+            urls.find(u => u.quality === "320kbps")?.url ||
+            urls.find(u => u.quality === "160kbps")?.url ||
+            urls[0]?.url;
 
-currentIndex++
+        if (!audioUrl) {
+            alert("Audio not available for this song.");
+            return;
+        }
 
-playSong(currentIndex)
+        modalTitle.textContent = `${song.title} - ${song.primaryArtists}`;
+        modalImage.src = song.image?.[2]?.url || "";
 
-}
+        modalAudio.src = audioUrl;
 
-}
+        modal.style.display = "flex";
 
+        modalAudio.load();
+        modalAudio.play();
 
-document.querySelector(".close").onclick=()=>{
-
-modal.style.display="none"
-
-modalAudio.pause()
-
-}
-
-
-searchButton.onclick=()=>{
-
-const query=searchInput.value.trim()
-
-if(query) searchSongs(query)
-
-}
-
-
-searchInput.addEventListener("keypress",(e)=>{
-
-if(e.key==="Enter"){
-
-const query=searchInput.value.trim()
-
-if(query) searchSongs(query)
+    } catch (error) {
+        console.error("Play error:", error);
+    }
 
 }
 
-})
+
+// PREVIOUS
+document.getElementById("prev-button").onclick = () => {
+
+    if (currentIndex > 0) {
+        currentIndex--;
+        playSong(currentIndex);
+    }
+
+};
+
+
+// NEXT
+document.getElementById("next-button").onclick = () => {
+
+    if (currentIndex < songs.length - 1) {
+        currentIndex++;
+        playSong(currentIndex);
+    }
+
+};
+
+
+// CLOSE PLAYER
+document.querySelector(".close").onclick = () => {
+
+    modal.style.display = "none";
+    modalAudio.pause();
+
+};
+
+
+// SEARCH BUTTON
+searchButton.onclick = () => {
+
+    const query = searchInput.value.trim();
+    if (query) searchSongs(query);
+
+};
+
+
+// ENTER KEY SEARCH
+searchInput.addEventListener("keypress", e => {
+
+    if (e.key === "Enter") {
+
+        const query = searchInput.value.trim();
+        if (query) searchSongs(query);
+
+    }
+
+});
